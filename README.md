@@ -1,5 +1,14 @@
 # AI Streaming Microservice
 
+## Quick Start with Docker Compose
+
+1. Copy `.env.example` to `.env` and fill in your API keys and configuration.
+2. Start the service:
+
+```bash
+docker-compose up --build
+```
+
 A microservice for streaming AI responses from OpenAI and Anthropic APIs with n8n integration.
 
 ## Requirements
@@ -34,15 +43,9 @@ docker compose up -d
 
 This will start:
 - AI Streaming service on port 8000
-- n8n on port 5678
-- Redis on port 6381
-- PostgreSQL (n8n's internal database)
 
 ### Persistent Data
-The stack uses Docker volumes for persistence:
-- `n8n_app_data`: n8n workflows and credentials
-- `n8n_db_data`: PostgreSQL database
-- `redis_data`: Redis data
+By default, this minimal setup does not use Docker volumes for persistence. If you add Redis or other services, you may want to configure volumes as needed.
 
 ## API Endpoints
 

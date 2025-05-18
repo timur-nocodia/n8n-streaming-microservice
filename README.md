@@ -11,6 +11,8 @@ docker-compose up --build
 
 A microservice for streaming AI responses from OpenAI and Anthropic APIs with n8n integration.
 
+Use n8n_streaming_demo_wf.json in n8n for demo and as a starting point of your n8n workflow
+
 ## Requirements
 - Docker and Docker Compose
 - n8n instance (included in docker-compose)
@@ -150,12 +152,6 @@ python generate_token.py
    - Handles stream IDs and access tokens
    - No permanent data storage
    - Runs on non-standard port (6381) to avoid conflicts
-
-4. **PostgreSQL Database**
-   - Stores n8n workflows and credentials
-   - Maintains execution history
-   - Handles user data and configurations
-   - Uses non-root user for security
 
 ## Architecture explanation
 

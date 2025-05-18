@@ -1,0 +1,384 @@
+{
+  "name": "streaming_demo_wf",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1520,
+        240
+      ],
+      "id": "fe00ade0-ec33-4af2-9e16-1bc8437c0eb8",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "resume": "webhook",
+        "httpMethod": "POST",
+        "limitWaitTime": true,
+        "resumeUnit": "minutes",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "83e2d95e-74fe-40ac-9c51-7e8b2a5e7946",
+      "name": "Wait",
+      "webhookId": "18259e2f-b745-43d1-853c-647f260c209b"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "192cf229-cd59-4fe7-b7e3-d4b58bcf1f61",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1520,
+        0
+      ],
+      "id": "4b23e85c-bfb0-4933-b216-2fc0e063dd98",
+      "name": "Webhook",
+      "webhookId": "192cf229-cd59-4fe7-b7e3-d4b58bcf1f61"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n\"status\": \"success\",\n  \"streamUrl\": \"{{ $json.streamUrl }}\"\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -220,
+        0
+      ],
+      "id": "c7595915-3e72-47b0-a76a-1bbc8dd71d58",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n\"status\": \"error\",\n\"error_message\": \"Service is not available now, please report to Support\",\n  \"streamUrl\": \"\"\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -880,
+        240
+      ],
+      "id": "01af2eb0-4b37-4aee-bd48-a25602bbd092",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "url": "https://you n8n url",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1300,
+        0
+      ],
+      "id": "3bc88209-cdf9-476e-a040-af43eb6cc393",
+      "name": "Streaming_Status"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://you n8n url",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n      \"n8nToken\": \"{{ $('JWT_Sign').item.json.token }}\",\n      \"resumeUrl\": \"{{ $execution.resumeUrl  }}\",\n      \"prompt\": \"{{ $('set_vars').item.json.prompt }}\",\n      \"userId\": \"{{ $('set_vars').item.json.userId }}\",\n      \"chatId\": \"{{ $('set_vars').item.json.chatId }}\",\n      \"model\": \"{{ $('set_vars').item.json.model }}\"\n    }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -440,
+        0
+      ],
+      "id": "6cfb193a-8f00-463d-b389-5f83d7baf2d8",
+      "name": "Streaming_Post"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a70e3d54-24d5-4287-a20d-c083b576547f",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "ok",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1100,
+        0
+      ],
+      "id": "b0f98603-8f16-494a-9922-ae7e643ba8eb",
+      "name": "If_Streaming_Status_OK"
+    },
+    {
+      "parameters": {
+        "useJson": true,
+        "claimsJson": "={\n  \"userId\": \"{{ $json.userId }}\",\n  \"chatId\": \"{{ $json.chatId }}\",\n  \"iat\": {{ Math.floor(Date.now() / 1000) }},\n  \"exp\": {{ Math.floor(Date.now() / 1000) + 60 }}\n\n}",
+        "options": {
+          "algorithm": "HS256"
+        }
+      },
+      "type": "n8n-nodes-base.jwt",
+      "typeVersion": 1,
+      "position": [
+        -660,
+        0
+      ],
+      "id": "a85e52e2-4f72-4f4c-a3b6-d98c1367e58c",
+      "name": "JWT_Sign",
+      "credentials": {
+        "jwtAuth": {
+          "id": "I7rLEsttDUvK8G2Q",
+          "name": "streaming_microservice"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataToSave": {
+          "values": [
+            {
+              "key": "=userId",
+              "value": "={{ $json.body.userId }}"
+            },
+            {
+              "key": "chatId",
+              "value": "={{ $json.body.chatId }}"
+            },
+            {
+              "key": "user_message",
+              "value": "={{ $json.body.prompt }}"
+            },
+            {
+              "key": "ai_message",
+              "value": "={{ $json.body.answer }}"
+            },
+            {
+              "key": "input_tokens",
+              "value": "={{ $json.body.input_tokens }}"
+            },
+            {
+              "key": "output_tokens",
+              "value": "={{ $json.body.output_tokens }}"
+            },
+            {
+              "key": "model",
+              "value": "={{ $('Webhook').item.json.body.model }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executionData",
+      "typeVersion": 1,
+      "position": [
+        220,
+        0
+      ],
+      "id": "3baf9cbd-54d7-4aec-aa06-bb208bfe13bb",
+      "name": "Execution Data"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "613f9404-6cae-4ba7-acd4-a5e71d3fc774",
+              "name": "prompt",
+              "value": "={{ $('Webhook').item.json.body.prompt }}",
+              "type": "string"
+            },
+            {
+              "id": "5c409006-c6e8-47ea-a623-61bff7d88e56",
+              "name": "userId",
+              "value": "={{ $('Webhook').item.json.body.userId }}",
+              "type": "string"
+            },
+            {
+              "id": "a54110d6-c97e-45d5-b935-f7d2b2b674d5",
+              "name": "chatId",
+              "value": "={{ $('Webhook').item.json.body.chatId }}",
+              "type": "string"
+            },
+            {
+              "id": "04b190fd-ae17-4390-a7c7-5ce023bfc738",
+              "name": "model",
+              "value": "={{ $('Webhook').item.json.body.model }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -880,
+        0
+      ],
+      "id": "0108d969-ddb5-42e4-9f25-9d99dd1583b9",
+      "name": "set_vars"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Streaming_Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Streaming_Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook1": {
+      "main": [
+        []
+      ]
+    },
+    "Streaming_Status": {
+      "main": [
+        [
+          {
+            "node": "If_Streaming_Status_OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Streaming_Post": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If_Streaming_Status_OK": {
+      "main": [
+        [
+          {
+            "node": "set_vars",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JWT_Sign": {
+      "main": [
+        [
+          {
+            "node": "Streaming_Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Execution Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_vars": {
+      "main": [
+        [
+          {
+            "node": "JWT_Sign",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": false,
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "6876ab28-f250-4fac-973e-c0b820aa6b00",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "83bc88e175fea558687df4a3a69f1232c12da0e957140d991e6eb4d47a9a98dd"
+  },
+  "id": "n8I95HUsh8Xfa6TV",
+  "tags": []
+}
